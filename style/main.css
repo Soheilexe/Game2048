@@ -12,16 +12,25 @@ html, body {
   font-size: 18px;
 }
 
-body {
-  margin: 20px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+body{
+
+margin:0;
+
+padding:15px;
+
+background:#0d0d1a;
+
+display:block;
+
+overflow-x:hidden;
+
+overflow-y:auto;
+
 }
 
 .container {
-  width: 500px;
+  width:530px;
+  max-width:none;
   margin: 0 auto;
   max-width: 100%;
   padding: 0 16px;
@@ -165,6 +174,9 @@ h1.title {
   height: 500px;
   box-sizing: border-box;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.5), inset 0 0 80px rgba(192, 132, 216, 0.03);
+  overflow:hidden;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 /* ===== grid ===== */
@@ -271,7 +283,6 @@ h1.title {
 .tile-1024 .tile-inner { background: #e8a0d8; color: #0d0d1a; font-size: 35px; box-shadow: 0 0 40px rgba(232, 160, 216, 0.35); }
 .tile-2048 .tile-inner { background: #ffd580; color: #0d0d1a; font-size: 35px; box-shadow: 0 0 60px rgba(255, 213, 128, 0.6); }
 .tile-super .tile-inner { background: #2a2a50; color: #e4e0f0; font-size: 30px; }
-
 /* ===== animations ===== */
 @keyframes appear {
   0% { opacity: 0; transform: scale(0); }
@@ -408,4 +419,43 @@ h1.title {
   .restart-button { height: 34px; line-height: 34px; font-size: 14px; padding: 0 16px; }
   .game-message p { font-size: 30px !important; height: 30px !important; line-height: 30px !important; }
   .game-message .lower { margin-top: 10px; }
+}
+@media (max-width:650px){
+
+h1.title{
+
+font-size:50px;
+
+float:none;
+
+text-align:center;
+
+}
+
+.scores-container{
+
+float:none;
+
+text-align:center;
+
+margin-top:10px;
+
+}
+
+.score-container,
+
+.best-container{
+
+font-size:18px;
+
+padding:10px 18px;
+
+}
+
+.footer-credit{
+
+font-size:12px;
+
+}
+
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<body><html>
 <head>
     <meta charset="utf-8">
     <title>2048 - Dark Edition</title>
@@ -93,7 +93,13 @@
     </style>
 </head>
 <body>
+    <div class="app-scale">
     <div class="container">
+
+
+    
+
+
         <div class="heading">
             <h1 class="title">2048</h1>
             <div class="scores-container">
@@ -170,8 +176,27 @@
         <div class="footer-credit">
             Developed by <a href="#">Soheil @Folder_x</a>
         </div>
-    </div>
+    
+    </div> <!-- container -->
+    </div> <!-- app-scale -->
 
+<script>
+function resizeGame() {
+    const app = document.querySelector(".app-scale");
+    if (!app) return;
+
+    const width = window.innerWidth - 20;
+    const scale = Math.min(1, width / 530);
+
+    app.style.transform = `scale(${scale})`;
+    app.style.transformOrigin = "top center";
+    app.style.width = "530px";
+    app.style.margin = "0 auto";
+}
+
+window.addEventListener("resize", resizeGame);
+window.addEventListener("load", resizeGame);
+</script>
     <script src="js/bind_polyfill.js"></script>
     <script src="js/classlist_polyfill.js"></script>
     <script src="js/animframe_polyfill.js"></script>
@@ -182,6 +207,5 @@
     <script src="js/local_storage_manager.js"></script>
     <script src="js/game_manager.js"></script>
     <script src="js/application.js"></script>
-    <script src="js/resize.js"></script>
 </body>
 </html>
