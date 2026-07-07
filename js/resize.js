@@ -19,7 +19,7 @@ function resizeTiles() {
 
     // فضای داخلی (padding) و فاصله‌ی بین سلول‌ها (gap)
     const padding = parseFloat(getComputedStyle(container).padding) || 15;
-    const gap = 15; // همان grid-spacing در CSS
+    const gap = 15;
 
     // محاسبه‌ی اندازه‌ی هر سلول بر اساس عرض و ارتفاع
     const innerSize = size - (padding * 2);
@@ -32,7 +32,7 @@ function resizeTiles() {
         cell.style.marginRight = gap + 'px';
     });
 
-    // حذف margin-right از آخرین سلول هر ردیف (با استفاده از کلاس)
+    // حذف margin-right از آخرین سلول هر ردیف
     gridCells.forEach((cell, index) => {
         if ((index + 1) % 4 === 0) {
             cell.style.marginRight = '0px';
@@ -46,13 +46,11 @@ function resizeTiles() {
             inner.style.width = cellSize + 'px';
             inner.style.height = cellSize + 'px';
             inner.style.lineHeight = cellSize + 'px';
-            // تنظیم فونت بر اساس اندازه‌ی سلول
             let fontSize = Math.min(cellSize * 0.5, 55);
             if (cellSize < 60) fontSize = cellSize * 0.35;
             inner.style.fontSize = fontSize + 'px';
         }
-        // به‌روزرسانی موقعیت تایل‌ها (با استفاده از کلاس‌های position)
-        // این کار توسط خود بازی انجام می‌شود، اما ما اطمینان حاصل می‌کنیم که transform صحیح است
+        // به‌روزرسانی موقعیت تایل‌ها
         const classes = tile.className.split(' ');
         const posClass = classes.find(c => c.startsWith('tile-position-'));
         if (posClass) {
@@ -64,25 +62,68 @@ function resizeTiles() {
             tile.style.transform = `translate(${translateX}px, ${translateY}px)`;
         }
     });
-
-    // به‌روزرسانی موقعیت‌های تایل‌ها (اگر تایل جدیدی اضافه شد)
-    // این کار توسط خود بازی انجام می‌شود، اما ما یک بار دیگر موقعیت‌ها را تنظیم می‌کنیم
 }
 
-// بارگذاری اولیه بعد از اتمام بارگذاری صفحه
+// ===== اجرای resize در زمان‌های مختلف =====
+
+// ۱. بارگذاری اولیه
 window.addEventListener('load', function() {
-    // کمی تاخیر برای اطمینان از رندر شدن بازی
     setTimeout(resizeTiles, 100);
 });
 
-// تنظیم مجدد در هنگام تغییر اندازه‌ی پنجره
+// ۲. تغییر اندازه‌ی پنجره
 let resizeTimeout;
 window.addEventListener('resize', function() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(resizeTiles, 150);
 });
 
-// همچنین در هنگام چرخش صفحه در موبایل
+// ۳. چرخش صفحه در موبایل
 window.addEventListener('orientationchange', function() {
     setTimeout(resizeTiles, 300);
+});
+
+// ===== ۴. رصد تغییرات تایل‌ها با MutationObserver =====
+// این قسمت باعث می‌شود هر زمان تایل جدیدی ساخته شد، resize دوباره اجرا شود
+
+let observerTimeout;
+
+function setupMutationObserver() {
+    const tileContainer = document.querySelector('.tile-container');
+    if (!tileContainer) {
+        // اگر تایل‌کانتینر هنوز ساخته نشده، دوباره تلاش کن
+        setTimeout(setupMutationObserver, 200);
+        return;
+    }
+
+    // یک observer برای تغییرات در tile-container
+    const observer = new MutationObserver(function(mutations) {
+        // فقط اگر تایل جدیدی اضافه شده یا تغییری کرده
+        let shouldResize = false;
+        mutations.forEach(mutation => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                shouldResize = true;
+            }
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                shouldResize = true;
+            }
+        });
+        if (shouldResize) {
+            clearTimeout(observerTimeout);
+            observerTimeout = setTimeout(resizeTiles, 50);
+        }
+    });
+
+    // شروع رصد تغییرات در tile-container و زیرالمان‌هایش
+    observer.observe(tileContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+}
+
+// راه‌اندازی observer بعد از بارگذاری کامل
+window.addEventListener('load', function() {
+    setTimeout(setupMutationObserver, 200);
 });
