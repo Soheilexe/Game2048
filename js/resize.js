@@ -1,120 +1,100 @@
 // =============================================
-// resize.js - تنظیم پویای اندازه‌ی تایل‌ها برای 2048
+// resize.js - نسخه نهایی (بدون تداخل با انیمیشن‌های بازی)
 // =============================================
 
-function resizeTiles() {
+function updateTilePositions() {
     const container = document.querySelector('.game-container');
-    const gridContainer = document.querySelector('.grid-container');
-    const tileContainer = document.querySelector('.tile-container');
-    const gridCells = document.querySelectorAll('.grid-cell');
-    const tiles = document.querySelectorAll('.tile');
+    if (!container) return;
 
-    if (!container || !gridContainer || !tileContainer) return;
-
-    // محاسبه‌ی اندازه‌ی واقعی کانتینر (با احتساب padding)
+    // محاسبه اندازه واقعی کانتینر
     const containerRect = container.getBoundingClientRect();
-    const containerWidth = containerRect.width;
-    const containerHeight = containerRect.height;
-    const size = Math.min(containerWidth, containerHeight);
+    const size = Math.min(containerRect.width, containerRect.height);
 
-    // فضای داخلی (padding) و فاصله‌ی بین سلول‌ها (gap)
+    // دریافت padding و gap
     const padding = parseFloat(getComputedStyle(container).padding) || 15;
-    const gap = 15;
+    const gap = 15; // فاصله بین سلول‌ها
 
-    // محاسبه‌ی اندازه‌ی هر سلول بر اساس عرض و ارتفاع
     const innerSize = size - (padding * 2);
-    const cellSize = (innerSize - (gap * (4 - 1))) / 4;
+    const cellSize = (innerSize - (gap * 3)) / 4;
 
-    // به‌روزرسانی اندازه‌ی grid-cell‌ها
-    gridCells.forEach(cell => {
+    // 1. به‌روزرسانی اندازه سلول‌های خالی (grid-cell)
+    const gridCells = document.querySelectorAll('.grid-cell');
+    gridCells.forEach((cell, index) => {
         cell.style.width = cellSize + 'px';
         cell.style.height = cellSize + 'px';
-        cell.style.marginRight = gap + 'px';
+        cell.style.marginRight = (index % 4 === 3) ? '0px' : gap + 'px';
     });
 
-    // حذف margin-right از آخرین سلول هر ردیف
-    gridCells.forEach((cell, index) => {
-        if ((index + 1) % 4 === 0) {
-            cell.style.marginRight = '0px';
-        }
+    // 2. به‌روزرسانی اندازه و فونت تایل‌های موجود
+    const tiles = document.querySelectorAll('.tile .tile-inner');
+    tiles.forEach(inner => {
+        inner.style.width = cellSize + 'px';
+        inner.style.height = cellSize + 'px';
+        inner.style.lineHeight = cellSize + 'px';
+        let fontSize = Math.min(cellSize * 0.5, 55);
+        if (cellSize < 60) fontSize = cellSize * 0.35;
+        inner.style.fontSize = fontSize + 'px';
     });
 
-    // به‌روزرسانی اندازه‌ی تایل‌ها
-    tiles.forEach(tile => {
-        const inner = tile.querySelector('.tile-inner');
-        if (inner) {
-            inner.style.width = cellSize + 'px';
-            inner.style.height = cellSize + 'px';
-            inner.style.lineHeight = cellSize + 'px';
-            let fontSize = Math.min(cellSize * 0.5, 55);
-            if (cellSize < 60) fontSize = cellSize * 0.35;
-            inner.style.fontSize = fontSize + 'px';
+    // 3. به‌روزرسانی موقعیت تایل‌ها با تغییر قوانین CSS (مهم‌ترین بخش)
+    // این کار باعث می‌شود انیمیشن‌های بازی (pop, merge) به‌درستی کار کنند
+    let styleTag = document.getElementById('dynamic-tile-positions');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'dynamic-tile-positions';
+        document.head.appendChild(styleTag);
+    }
+
+    let cssRules = '';
+    for (let y = 1; y <= 4; y++) {
+        for (let x = 1; x <= 4; x++) {
+            const translateX = (x - 1) * (cellSize + gap);
+            const translateY = (y - 1) * (cellSize + gap);
+            cssRules += `.tile.tile-position-${x}-${y} { transform: translate(${translateX}px, ${translateY}px); }\n`;
         }
-        // به‌روزرسانی موقعیت تایل‌ها
-        const classes = tile.className.split(' ');
-        const posClass = classes.find(c => c.startsWith('tile-position-'));
-        if (posClass) {
-            const parts = posClass.split('-');
-            const x = parseInt(parts[2]) - 1;
-            const y = parseInt(parts[3]) - 1;
-            const translateX = x * (cellSize + gap);
-            const translateY = y * (cellSize + gap);
-            tile.style.transform = `translate(${translateX}px, ${translateY}px)`;
-        }
-    });
+    }
+    styleTag.textContent = cssRules;
 }
 
-// ===== اجرای resize در زمان‌های مختلف =====
+// ===== اجرا در زمان‌های مختلف =====
 
-// ۱. بارگذاری اولیه
+function safeResize() {
+    if (document.querySelector('.game-container')) {
+        updateTilePositions();
+    }
+}
+
+// بارگذاری اولیه
 window.addEventListener('load', function() {
-    setTimeout(resizeTiles, 100);
+    setTimeout(safeResize, 100);
 });
 
-// ۲. تغییر اندازه‌ی پنجره
+// تغییر اندازه پنجره
 let resizeTimeout;
 window.addEventListener('resize', function() {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(resizeTiles, 150);
+    resizeTimeout = setTimeout(safeResize, 150);
 });
 
-// ۳. چرخش صفحه در موبایل
+// چرخش صفحه در موبایل
 window.addEventListener('orientationchange', function() {
-    setTimeout(resizeTiles, 300);
+    setTimeout(safeResize, 300);
 });
 
-// ===== ۴. رصد تغییرات تایل‌ها با MutationObserver =====
-// این قسمت باعث می‌شود هر زمان تایل جدیدی ساخته شد، resize دوباره اجرا شود
-
+// رصد تغییرات برای تایل‌های جدید (با MutationObserver)
 let observerTimeout;
-
-function setupMutationObserver() {
+function setupObserver() {
     const tileContainer = document.querySelector('.tile-container');
     if (!tileContainer) {
-        // اگر تایل‌کانتینر هنوز ساخته نشده، دوباره تلاش کن
-        setTimeout(setupMutationObserver, 200);
+        setTimeout(setupObserver, 200);
         return;
     }
 
-    // یک observer برای تغییرات در tile-container
-    const observer = new MutationObserver(function(mutations) {
-        // فقط اگر تایل جدیدی اضافه شده یا تغییری کرده
-        let shouldResize = false;
-        mutations.forEach(mutation => {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                shouldResize = true;
-            }
-            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                shouldResize = true;
-            }
-        });
-        if (shouldResize) {
-            clearTimeout(observerTimeout);
-            observerTimeout = setTimeout(resizeTiles, 50);
-        }
+    const observer = new MutationObserver(function() {
+        clearTimeout(observerTimeout);
+        observerTimeout = setTimeout(safeResize, 50);
     });
 
-    // شروع رصد تغییرات در tile-container و زیرالمان‌هایش
     observer.observe(tileContainer, {
         childList: true,
         subtree: true,
@@ -123,7 +103,6 @@ function setupMutationObserver() {
     });
 }
 
-// راه‌اندازی observer بعد از بارگذاری کامل
 window.addEventListener('load', function() {
-    setTimeout(setupMutationObserver, 200);
+    setTimeout(setupObserver, 300);
 });
