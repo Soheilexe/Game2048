@@ -1,6 +1,8 @@
 // =============================================
-// resize.js - نسخه نهایی (بدون تداخل با انیمیشن‌های بازی)
+// resize.js - نسخه نهایی با رصد محدود
 // =============================================
+
+let lastContainerSize = 0;
 
 function updateTilePositions() {
     const container = document.querySelector('.game-container');
@@ -10,14 +12,18 @@ function updateTilePositions() {
     const containerRect = container.getBoundingClientRect();
     const size = Math.min(containerRect.width, containerRect.height);
 
-    // دریافت padding و gap
-    const padding = parseFloat(getComputedStyle(container).padding) || 15;
-    const gap = 15; // فاصله بین سلول‌ها
+    // اگر اندازه تغییر نکرده، کاری نکن (از لرزش جلوگیری میکنه)
+    if (Math.abs(size - lastContainerSize) < 1 && lastContainerSize !== 0) {
+        return;
+    }
+    lastContainerSize = size;
 
+    const padding = parseFloat(getComputedStyle(container).padding) || 15;
+    const gap = 15;
     const innerSize = size - (padding * 2);
     const cellSize = (innerSize - (gap * 3)) / 4;
 
-    // 1. به‌روزرسانی اندازه سلول‌های خالی (grid-cell)
+    // به‌روزرسانی grid-cell‌ها
     const gridCells = document.querySelectorAll('.grid-cell');
     gridCells.forEach((cell, index) => {
         cell.style.width = cellSize + 'px';
@@ -25,7 +31,7 @@ function updateTilePositions() {
         cell.style.marginRight = (index % 4 === 3) ? '0px' : gap + 'px';
     });
 
-    // 2. به‌روزرسانی اندازه و فونت تایل‌های موجود
+    // به‌روزرسانی اندازه تایل‌های موجود
     const tiles = document.querySelectorAll('.tile .tile-inner');
     tiles.forEach(inner => {
         inner.style.width = cellSize + 'px';
@@ -36,8 +42,7 @@ function updateTilePositions() {
         inner.style.fontSize = fontSize + 'px';
     });
 
-    // 3. به‌روزرسانی موقعیت تایل‌ها با تغییر قوانین CSS (مهم‌ترین بخش)
-    // این کار باعث می‌شود انیمیشن‌های بازی (pop, merge) به‌درستی کار کنند
+    // به‌روزرسانی موقعیت تایل‌ها با CSS Rules
     let styleTag = document.getElementById('dynamic-tile-positions');
     if (!styleTag) {
         styleTag = document.createElement('style');
@@ -56,33 +61,26 @@ function updateTilePositions() {
     styleTag.textContent = cssRules;
 }
 
-// ===== اجرا در زمان‌های مختلف =====
-
-function safeResize() {
-    if (document.querySelector('.game-container')) {
-        updateTilePositions();
-    }
-}
+// ===== فقط در زمان تغییر اندازه یا اضافه شدن تایل جدید =====
 
 // بارگذاری اولیه
 window.addEventListener('load', function() {
-    setTimeout(safeResize, 100);
+    setTimeout(updateTilePositions, 100);
 });
 
 // تغییر اندازه پنجره
 let resizeTimeout;
 window.addEventListener('resize', function() {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(safeResize, 150);
+    resizeTimeout = setTimeout(updateTilePositions, 150);
 });
 
 // چرخش صفحه در موبایل
 window.addEventListener('orientationchange', function() {
-    setTimeout(safeResize, 300);
+    setTimeout(updateTilePositions, 300);
 });
 
-// رصد تغییرات برای تایل‌های جدید (با MutationObserver)
-let observerTimeout;
+// ===== رصد تغییرات با MutationObserver (فقط childList) =====
 function setupObserver() {
     const tileContainer = document.querySelector('.tile-container');
     if (!tileContainer) {
@@ -90,16 +88,25 @@ function setupObserver() {
         return;
     }
 
-    const observer = new MutationObserver(function() {
-        clearTimeout(observerTimeout);
-        observerTimeout = setTimeout(safeResize, 50);
+    const observer = new MutationObserver(function(mutations) {
+        // فقط زمانی resize کن که تایل جدید اضافه شده باشد (نه تغییر attribute)
+        let hasNewTile = false;
+        for (const mutation of mutations) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                hasNewTile = true;
+                break;
+            }
+        }
+        if (hasNewTile) {
+            // با تاخیر کم، تا انیمیشن بازی اول انجام بشه
+            setTimeout(updateTilePositions, 30);
+        }
     });
 
     observer.observe(tileContainer, {
         childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['style', 'class']
+        subtree: true
+        // attributes رو حذف کردیم تا فقط روی اضافه شدن تایل جدید واکنش نشون بده
     });
 }
 
