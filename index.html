@@ -186,9 +186,7 @@ function resizeGame() {
     if (!app) return;
 
     const width = window.innerWidth - 20;
-    const scale = Math.min(1, width / 530);
 
-    app.style.transform = `scale(${scale})`;
     app.style.transformOrigin = "top center";
     app.style.width = "530px";
     app.style.margin = "0 auto";
