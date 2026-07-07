@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>2048 - Dark Edition</title>
+
+    <link href="style/main.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
+    <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x920.png" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+
+    <!-- استایل‌های اضافی برای دارک مود (تکمیل‌کننده) -->
+    <style type="text/css">
+        /* ===== اصلاحات دارک مود (تکمیل‌کننده main.css) ===== */
+        body {
+            background: #0f0f1a !important;
+        }
+        .container {
+            background: #0f0f1a !important;
+        }
+        .score-container, .best-container {
+            background: #1a1a2e !important;
+            border: 1px solid #2a2a4a !important;
+        }
+        .game-container {
+            background: #1a1a2e !important;
+        }
+        .grid-cell {
+            background: rgba(30, 30, 50, 0.7) !important;
+        }
+        .restart-button {
+            background: #1a1a2e !important;
+            border-color: #f5c842 !important;
+            color: #f5c842 !important;
+        }
+        .restart-button:hover {
+            background: #f5c842 !important;
+            color: #0f0f1a !important;
+        }
+        .game-message {
+            background: rgba(15, 15, 26, 0.92) !important;
+            border-color: rgba(245, 200, 66, 0.15) !important;
+        }
+        .game-message p {
+            color: #f5c842 !important;
+        }
+        .game-message .lower a {
+            background: #1a1a2e !important;
+            border-color: #f5c842 !important;
+            color: #f5c842 !important;
+        }
+        .game-message .lower a:hover {
+            background: #f5c842 !important;
+            color: #0f0f1a !important;
+        }
+        .game-message.game-won {
+            background: rgba(15, 15, 26, 0.92) !important;
+        }
+        h1.title {
+            color: #f5c842 !important;
+        }
+
+        /* ===== پنهان کردن بخش‌های اضافی ===== */
+        .stats { display: none !important; }
+        .updating { display: none !important; }
+        .top_table { display: none !important; }
+        #table_wrap { display: none !important; }
+        .score .logo { display: none !important; }
+
+        /* ===== نمایش فوتر با اسم شما ===== */
+        .footer-credit {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .footer-credit a {
+            color: #f5c842;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-credit a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="heading">
+            <h1 class="title">2048</h1>
+            <div class="scores-container">
+                <div class="score-container">0</div>
+                <div class="best-container">0</div>
+            </div>
+        </div>
+
+        <!-- بخش‌های اضافی (پنهان) -->
+        <div id="table_wrap" class="table_wrap opened" style="display:none;"></div>
+        <div class="above-game" style="display:none;">
+            <div class="stats">
+                <div class="you_scored">You scored</div>
+                <div class="score_num">
+                    <span id="score_val"></span>
+                    <div class="score_coin"></div>
+                    <div class="score_share_wrap"><div id="score_share" class="score_share"><span class="share_label">Share</span></div></div>
+                </div>
+            </div>
+            <div id="updating" class="updating">Updating results...</div>
+            <div class="top_table">
+                <div id="scores_table">
+                    <div class="scores_loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== بخش اصلی بازی ===== -->
+        <div class="game-container">
+            <div class="game-message">
+                <p></p>
+                <div class="lower">
+                    <a class="keep-playing-button">Keep going</a>
+                    <a class="retry-button">Try again</a>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+            </div>
+
+            <div class="tile-container"></div>
+        </div>
+
+        <!-- ===== دکمه New Game ===== -->
+        <div style="text-align: center; margin-top: 16px;">
+            <a class="restart-button" style="float: none; display: inline-block;">New Game</a>
+        </div>
+
+        <!-- ===== فوتر با اسم شما ===== -->
+        <div class="footer-credit">
+            Developed by <a href="#">Soheil @Folder_x</a>
+        </div>
+    </div>
+
+    <script src="js/bind_polyfill.js"></script>
+    <script src="js/classlist_polyfill.js"></script>
+    <script src="js/animframe_polyfill.js"></script>
+    <script src="js/keyboard_input_manager.js"></script>
+    <script src="js/html_actuator.js"></script>
+    <script src="js/grid.js"></script>
+    <script src="js/tile.js"></script>
+    <script src="js/local_storage_manager.js"></script>
+    <script src="js/game_manager.js"></script>
+    <script src="js/application.js"></script>
+</body>
+</html>
