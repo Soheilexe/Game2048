@@ -12,25 +12,16 @@ html, body {
   font-size: 18px;
 }
 
-body{
-
-margin:0;
-
-padding:15px;
-
-background:#0d0d1a;
-
-display:block;
-
-overflow-x:hidden;
-
-overflow-y:auto;
-
+body {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .container {
-  width:530px;
-  max-width:none;
+  width: 500px;
   margin: 0 auto;
   max-width: 100%;
   padding: 0 16px;
@@ -174,9 +165,6 @@ h1.title {
   height: 500px;
   box-sizing: border-box;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.5), inset 0 0 80px rgba(192, 132, 216, 0.03);
-  overflow:hidden;
-  margin-left:auto;
-  margin-right:auto;
 }
 
 /* ===== grid ===== */
@@ -283,6 +271,7 @@ h1.title {
 .tile-1024 .tile-inner { background: #e8a0d8; color: #0d0d1a; font-size: 35px; box-shadow: 0 0 40px rgba(232, 160, 216, 0.35); }
 .tile-2048 .tile-inner { background: #ffd580; color: #0d0d1a; font-size: 35px; box-shadow: 0 0 60px rgba(255, 213, 128, 0.6); }
 .tile-super .tile-inner { background: #2a2a50; color: #e4e0f0; font-size: 30px; }
+
 /* ===== animations ===== */
 @keyframes appear {
   0% { opacity: 0; transform: scale(0); }
@@ -386,55 +375,37 @@ h1.title {
 }
 
 /* ===== responsive ===== */
-@media (max-width:520px){
-
-.container{
-    width:500px;
-    transform:scale(.82);
-    transform-origin:top center;
-}
-
-body{
-    overflow-x:hidden;
-}
-
-}
-@media (max-width:650px){
-
-h1.title{
-
-font-size:50px;
-
-float:none;
-
-text-align:center;
-
-}
-
-.scores-container{
-
-float:none;
-
-text-align:center;
-
-margin-top:10px;
-
-}
-
-.score-container,
-
-.best-container{
-
-font-size:18px;
-
-padding:10px 18px;
-
-}
-
-.footer-credit{
-
-font-size:12px;
-
-}
-
+@media (max-width: 520px) {
+  .container { width: 100%; padding: 0 10px; }
+  .game-container { width: 100%; height: auto; aspect-ratio: 1/1; padding: 10px; margin-top: 20px; }
+  .grid-container { top: 10px; left: 10px; right: 10px; bottom: 10px; }
+  .tile-container { top: 10px; left: 10px; right: 10px; bottom: 10px; }
+  .grid-cell { width: calc((100% - 30px) / 4); height: calc((100% - 30px) / 4); margin-right: 10px; }
+  .grid-cell:last-child { margin-right: 0; }
+  .grid-row { margin-bottom: 10px; }
+  .tile .tile-inner { width: calc((100% - 30px) / 4); height: calc((100% - 30px) / 4); line-height: calc((100% - 30px) / 4); font-size: 28px; }
+  .tile-128 .tile-inner, .tile-256 .tile-inner, .tile-512 .tile-inner { font-size: 24px !important; }
+  .tile-1024 .tile-inner, .tile-2048 .tile-inner { font-size: 18px !important; }
+  .tile.tile-position-1-1 { transform: translate(0px, 0px); }
+  .tile.tile-position-2-1 { transform: translate(calc((100% + 10px) / 4), 0px); }
+  .tile.tile-position-3-1 { transform: translate(calc((100% + 10px) / 4 * 2), 0px); }
+  .tile.tile-position-4-1 { transform: translate(calc((100% + 10px) / 4 * 3), 0px); }
+  .tile.tile-position-1-2 { transform: translate(0px, calc((100% + 10px) / 4)); }
+  .tile.tile-position-2-2 { transform: translate(calc((100% + 10px) / 4), calc((100% + 10px) / 4)); }
+  .tile.tile-position-3-2 { transform: translate(calc((100% + 10px) / 4 * 2), calc((100% + 10px) / 4)); }
+  .tile.tile-position-4-2 { transform: translate(calc((100% + 10px) / 4 * 3), calc((100% + 10px) / 4)); }
+  .tile.tile-position-1-3 { transform: translate(0px, calc((100% + 10px) / 4 * 2)); }
+  .tile.tile-position-2-3 { transform: translate(calc((100% + 10px) / 4), calc((100% + 10px) / 4 * 2)); }
+  .tile.tile-position-3-3 { transform: translate(calc((100% + 10px) / 4 * 2), calc((100% + 10px) / 4 * 2)); }
+  .tile.tile-position-4-3 { transform: translate(calc((100% + 10px) / 4 * 3), calc((100% + 10px) / 4 * 2)); }
+  .tile.tile-position-1-4 { transform: translate(0px, calc((100% + 10px) / 4 * 3)); }
+  .tile.tile-position-2-4 { transform: translate(calc((100% + 10px) / 4), calc((100% + 10px) / 4 * 3)); }
+  .tile.tile-position-3-4 { transform: translate(calc((100% + 10px) / 4 * 2), calc((100% + 10px) / 4 * 3)); }
+  .tile.tile-position-4-4 { transform: translate(calc((100% + 10px) / 4 * 3), calc((100% + 10px) / 4 * 3)); }
+  .score-container, .best-container { padding: 10px 15px; font-size: 18px; min-width: 40px; }
+  .score-container:after, .best-container:after { font-size: 10px; top: 6px; }
+  h1.title { font-size: 36px; margin-top: 8px; }
+  .restart-button { height: 34px; line-height: 34px; font-size: 14px; padding: 0 16px; }
+  .game-message p { font-size: 30px !important; height: 30px !important; line-height: 30px !important; }
+  .game-message .lower { margin-top: 10px; }
 }
